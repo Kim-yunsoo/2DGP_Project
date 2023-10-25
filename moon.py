@@ -197,3 +197,166 @@ class Punch:
             elif int(boy.frame) == 1:
                  boy.image_PUNCH.clip_composite_draw(85, 0, 75, 110, 0, 'h', boy.x-10, boy.y+10, 210, 280)
 
+
+class Kick:
+    @staticmethod
+    def enter(boy, e):
+        boy.frame = 0
+        if (right_down(e) and StateMachine.isdash and StateMachine.iskick) or (right_up(e) and StateMachine.isdash and StateMachine.iskick)or (right_down(e) and StateMachine.iskick)  :  # 오른쪽으로 RUN
+            boy.face_dir =  1
+        elif (left_down(e) and StateMachine.isdash and StateMachine.iskick) or (left_up(e) and StateMachine.isdash and StateMachine.iskick) or (left_down(e) and StateMachine.iskick):  # 왼쪽으로 RUN
+            boy.face_dir = -1
+        boy.frame = 0   #Add
+
+    @staticmethod
+    def exit(boy, e):
+        pass
+
+    @staticmethod
+    def do(boy):
+        boy.frame = (boy.frame + (FRAMES_PER_ACTION) * ACTION_PER_TIME * game_framework.frame_time)# % 6   Add
+        if int(boy.frame) > 5:
+            boy.frame = 0
+            StateMachine.iskick = False
+            boy.state_machine.handle_event(('TIME_OUT', 0))
+
+            # boy.frame = (boy.frame + (FRAMES_PER_ACTION) * ACTION_PER_TIME * game_framework.frame_time) % 6
+        # boy.x += boy.dir * (RUN_SPEED_PPS+100) * game_framework.frame_time
+        # boy.x = clamp(60, boy.x, 1000 - 60)
+
+        pass
+    @staticmethod
+    def draw(boy):
+        pix_posx = [0, 96, 188, 275, 378, 490]
+
+        if boy.face_dir == 1:
+            boy.image_KICK.clip_draw(pix_posx[int(boy.frame)], 0, 93, 110, boy.x, boy.y+10, 220, 280)
+
+        elif boy.face_dir == -1:
+            boy.image_KICK.clip_composite_draw(pix_posx[int(boy.frame)], 0, 93, 110, 0, 'h', boy.x, boy.y+10, 220, 280)
+
+
+class RunPunch:
+    @staticmethod
+    def enter(boy, e):
+        boy.frame=0
+        if (StateMachine.isspace and right_down(e)) or (StateMachine.isspace and right_up(e)) :  # 오른쪽으로 RUN
+            boy.face_dir = 1
+        elif (StateMachine.isspace and left_down(e)) or(StateMachine.isspace and left_up(e)):  # 왼쪽으로 RUN
+            boy.face_dir = -1
+
+    @staticmethod
+    def exit(boy, e):
+        pass
+
+    @staticmethod
+    def do(boy):
+        boy.frame = (boy.frame + (FRAMES_PER_ACTION) * ACTION_PER_TIME * game_framework.frame_time)
+        if int(boy.frame) > 3:
+            boy.frame = 0
+            boy.state_machine.handle_event(('TIME_OUT', 0))
+
+
+
+        pass
+    @staticmethod
+    def draw(boy):
+        pix_posX = [10, 125, 260, 390]
+
+        if boy.face_dir == 1:
+            boy.image_RUNPUNCH.clip_draw(pix_posX[int(boy.frame)], 0, 115, 106, boy.x+10, boy.y+20, 305, 290)
+        elif boy.face_dir == -1:
+            boy.image_RUNPUNCH.clip_composite_draw(pix_posX[int(boy.frame)], 0, 115, 106, 0, 'h', boy.x-10,  boy.y+20, 305, 290)
+
+
+class StateMachine:
+    isdash = False
+    ispunch = True
+    iskick = True
+    isspace=False
+    def __init__(self, boy):
+        self.boy = boy
+        self.cur_state = Idle
+        self.transitions = {
+            Idle: {right_down: Walk, left_down: Walk, left_up: Idle, right_up: Idle, space_down: Idle,a_down:Punch, s_down:Kick},
+            Walk: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle, shift_down:Run, a_down:Punch, s_down:Kick,},
+            Run:{shift_up:Walk, right_up: Idle, left_up:Idle, right_down: Idle, left_down: Idle, a_down:Punch, s_down:Kick, space_down:RunPunch},
+            Punch:{right_down:Walk , left_down:Walk, s_down:Kick, time_out:Idle},
+            Kick:{ right_down:Walk , left_down:Walk,a_down:Punch, time_out:Idle},
+            RunPunch:{time_out:Idle}
+        }
+
+    def start(self):
+        self.cur_state.enter(self.boy, ('NONE', 0))
+
+    def update(self):
+        self.cur_state.do(self.boy)
+
+    def handle_event(self, e):
+        if shift_down(e):
+            StateMachine.isdash=True
+        elif shift_up(e):
+            StateMachine.isdash = False
+
+        # if a_down(e):
+        #     StateMachine.ispunch = True
+        if a_up(e):
+            StateMachine.ispunch = True
+
+        if space_down(e):
+            StateMachine.isspace=True
+        elif space_up(e):
+            StateMachine.isspace = False
+        if s_up(e):
+            StateMachine.iskick = True
+
+
+
+        for check_event, next_state in self.transitions[self.cur_state].items():
+            if check_event(e):
+                self.cur_state.exit(self.boy, e)
+                self.cur_state = next_state
+                self.cur_state.enter(self.boy, e)
+                return True
+
+        return False
+
+    def draw(self):
+        self.cur_state.draw(self.boy)
+
+
+class Moon:
+    def __init__(self):
+        self.x, self.y = 500, 200
+        self.frame = 0
+        self.face_dir = 1
+        self.dir = 0
+        self.image_WALK = load_image('resource/moon/moonWalk.png')
+        self.image_IDLE = load_image('resource/moon/moonIdle.png')
+        self.image_RUN = load_image('resource/moon/moonRun.png')
+        self.image_PUNCH = load_image('resource/moon/moonPunch.png')
+        self.image_KICK=load_image('resource/moon/moonKick.png')
+        self.image_HPUI=load_image('resource/ui/hpUI2.png')
+        self.image_moonUI=load_image('resource/ui/moonUI.png')
+        self.image_RUNPUNCH=load_image('resource/moon/moonRunPunch.png')
+        self.state_machine = StateMachine(self)
+        self.state_machine.start()
+        self.item = None
+        self.hp=100
+
+
+
+
+    def update(self):
+        self.state_machine.update()
+
+    def handle_event(self, event):
+        self.state_machine.handle_event(('INPUT', event))
+
+    def draw(self):
+
+        self.state_machine.draw()
+        self.image_moonUI.clip_draw(0,0,173,75  ,105,640,    160,70)
+
+        for i in range(self.hp//10):
+            self.image_HPUI.clip_draw(0, 0,  549, 41,    59+(38*i), 600,    38, 30)
