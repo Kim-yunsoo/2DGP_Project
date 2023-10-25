@@ -131,7 +131,6 @@ class Walk:
 
 
 
-
 class Run:
     @staticmethod
     def enter(boy, e):
