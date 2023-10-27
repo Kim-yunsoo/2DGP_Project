@@ -142,6 +142,148 @@ class Walk:
             boy.image_WALK.clip_composite_draw(pix_posx[int(boy.frame)], 0, 44, 115, 0, 'h', boy.x, boy.y, 130, 280)
 
 
+class Run:
+    @staticmethod
+    def enter(boy, e):
+        if (right_down(e) and StateMachine.isdash) or (left_up(e) and StateMachine.isdash):  # 오른쪽으로 RUN
+            boy.dir, boy.action, boy.face_dir = 1, 1, 1
+        elif (left_down(e) and StateMachine.isdash) or (right_up(e) and StateMachine.isdash):  # 왼쪽으로 RUN
+            boy.dir, boy.action, boy.face_dir = -1, 0, -1
+
+    @staticmethod
+    def exit(boy, e):
+
+        pass
+
+    @staticmethod
+    def do(boy):
+        boy.frame = (boy.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 6
+        boy.x += boy.dir * (RUN_SPEED_PPS+300) * game_framework.frame_time
+        boy.x = clamp(60, boy.x, 1000 - 60)
+
+
+        pass
+    @staticmethod
+    def draw(boy):
+        pix_posx = [0, 102, 197, 305, 410, 505]
+
+        if boy.face_dir == 1:
+                 boy.image_RUN.clip_draw(pix_posx[int(boy.frame)], 0, 84, 99, boy.x, boy.y, 220, 280)
+
+        elif boy.face_dir == -1:
+                boy.image_RUN.clip_composite_draw(pix_posx[int(boy.frame)], 0, 84, 99, 0, 'h',boy.x, boy.y,220, 280)
+
+        # boy.image.clip_draw(boy.frame * 100, boy.action * 100, 100, 100, boy.x, boy.y)
+
+
+class Punch:
+    @staticmethod
+    def enter(boy, e):
+        boy.frame=0
+        if (right_down(e) and StateMachine.isdash and StateMachine.ispunch) or (right_up(e) and StateMachine.isdash and StateMachine.ispunch)or (right_down(e) and StateMachine.ispunch)  :  # 오른쪽으로 RUN
+            boy.dir, boy.action, boy.face_dir = 1, 1, 1
+        elif (left_down(e) and StateMachine.isdash and StateMachine.ispunch) or (left_up(e) and StateMachine.isdash and StateMachine.ispunch) or (left_down(e) and StateMachine.ispunch):  # 왼쪽으로 RUN
+            boy.dir, boy.action, boy.face_dir = -1, 0, -1
+
+    @staticmethod
+    def exit(boy, e):
+        pass
+
+    @staticmethod
+    def do(boy):
+        # boy.frame = (boy.frame + (FRAMES_PER_ACTION) * ACTION_PER_TIME * game_framework.frame_time) % 2
+
+        boy.frame = (boy.frame + (FRAMES_PER_ACTION) * ACTION_PER_TIME * game_framework.frame_time)
+        if int(boy.frame) > 1:
+            boy.frame = 0
+            StateMachine.ispunch = False
+            boy.state_machine.handle_event(('TIME_OUT', 0))
+
+
+
+        pass
+    @staticmethod
+    def draw(boy):
+        global ispush
+        pix_posX = [0, 62]
+
+        if boy.face_dir == 1:
+                boy.image_PUNCH.clip_draw(pix_posX[int(boy.frame)], 0, 65, 110, boy.x+20 , boy.y,  180, 280)
+        elif boy.face_dir == -1:
+                 boy.image_PUNCH.clip_composite_draw(pix_posX[int(boy.frame)], 0, 65, 110, 0, 'h', boy.x-20 , boy.y,  180, 280)
+
+
+class Kick:
+    @staticmethod
+    def enter(boy, e):
+        boy.frame = 0
+        if (right_down(e) and StateMachine.isdash and StateMachine.iskick) or (right_up(e) and StateMachine.isdash and StateMachine.iskick)or (right_down(e) and StateMachine.iskick)  :  # 오른쪽으로 RUN
+            boy.face_dir =  1
+        elif (left_down(e) and StateMachine.isdash and StateMachine.iskick) or (left_up(e) and StateMachine.isdash and StateMachine.iskick) or (left_down(e) and StateMachine.iskick):  # 왼쪽으로 RUN
+            boy.face_dir = -1
+        boy.frame = 0   #Add
+
+    @staticmethod
+    def exit(boy, e):
+        pass
+
+    @staticmethod
+    def do(boy):
+        boy.frame = (boy.frame + (FRAMES_PER_ACTION) * ACTION_PER_TIME * game_framework.frame_time)# % 6   Add
+        if int(boy.frame) > 1:
+            boy.frame = 0
+            StateMachine.iskick = False
+            boy.state_machine.handle_event(('TIME_OUT', 0))
+
+            # boy.frame = (boy.frame + (FRAMES_PER_ACTION) * ACTION_PER_TIME * game_framework.frame_time) % 6
+        # boy.x += boy.dir * (RUN_SPEED_PPS+100) * game_framework.frame_time
+        # boy.x = clamp(60, boy.x, 1000 - 60)
+
+        pass
+    @staticmethod
+    def draw(boy):
+        pix_posx = [7, 100, 190]
+
+        if boy.face_dir == 1:
+            boy.image_KICK.clip_draw(pix_posx[int(boy.frame)], 0, 93, 109, boy.x+30, boy.y, 250, 280)
+
+
+        elif boy.face_dir == -1:
+            boy.image_KICK.clip_composite_draw(pix_posx[int(boy.frame)], 0, 93, 109, 0, 'h', boy.x-30, boy.y, 250, 280)
+class RunKick:
+    @staticmethod
+    def enter(boy, e):
+        boy.frame=0
+        if (StateMachine.isspace and right_down(e)) or (StateMachine.isspace and right_up(e)) :  # 오른쪽으로 RUN
+            boy.face_dir = 1
+        elif (StateMachine.isspace and left_down(e)) or(StateMachine.isspace and left_up(e)):  # 왼쪽으로 RUN
+            boy.face_dir = -1
+
+    @staticmethod
+    def exit(boy, e):
+        pass
+
+    @staticmethod
+    def do(boy):
+        boy.frame = (boy.frame + (FRAMES_PER_ACTION) * ACTION_PER_TIME * game_framework.frame_time)
+        if int(boy.frame) > 2:
+            boy.frame = 0
+            boy.state_machine.handle_event(('TIME_OUT', 0))
+
+
+
+        pass
+    @staticmethod
+    def draw(boy):
+        pix_posX = [6, 103, 211]
+
+        if boy.face_dir == 1:
+            boy.image_RUNKICK.clip_draw(pix_posX[int(boy.frame)], 0, 97, 106, boy.x + 30, boy.y + 10, 300, 290)
+
+        elif boy.face_dir == -1:
+            boy.image_RUNKICK.clip_composite_draw(pix_posX[int(boy.frame)], 0,  97, 106, 0, 'h', boy.x-30,  boy.y + 10, 300, 290)
+
+
 
 
 class StateMachine:
