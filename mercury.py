@@ -161,6 +161,111 @@ class Run:
                 boy.image_RUN.clip_composite_draw(pix_posx[int(boy.frame)], 0, 79, 99, 0, 'h',boy.x, boy.y,220, 280)
 
 
+class Punch:
+    @staticmethod
+    def enter(boy, e):
+        boy.frame=0
+        if (right_down(e) and StateMachine.isdash and StateMachine.ispunch) or (right_up(e) and StateMachine.isdash and StateMachine.ispunch)or (right_down(e) and StateMachine.ispunch)  :  # 오른쪽으로 RUN
+            boy.dir, boy.action, boy.face_dir = 1, 1, 1
+        elif (left_down(e) and StateMachine.isdash and StateMachine.ispunch) or (left_up(e) and StateMachine.isdash and StateMachine.ispunch) or (left_down(e) and StateMachine.ispunch):  # 왼쪽으로 RUN
+            boy.dir, boy.action, boy.face_dir = -1, 0, -1
+
+    @staticmethod
+    def exit(boy, e):
+        pass
+
+    @staticmethod
+    def do(boy):
+        # boy.frame = (boy.frame + (FRAMES_PER_ACTION) * ACTION_PER_TIME * game_framework.frame_time) % 2
+
+        boy.frame = (boy.frame + (FRAMES_PER_ACTION) * ACTION_PER_TIME * game_framework.frame_time)
+        if int(boy.frame) > 1:
+            boy.frame = 0
+            StateMachine.ispunch = False
+            boy.state_machine.handle_event(('TIME_OUT', 0))
+
+
+
+        pass
+    @staticmethod
+    def draw(boy):
+        global ispush
+        pix_posX = [0, 80]
+
+        if boy.face_dir == 1:
+            boy.image_PUNCH.clip_draw(pix_posX[int(boy.frame)], 0, 72, 110, boy.x + 25, boy.y, 180, 280)
+
+        elif boy.face_dir == -1:
+                 boy.image_PUNCH.clip_composite_draw(pix_posX[int(boy.frame)], 0, 72, 110, 0, 'h', boy.x-20 , boy.y,  180, 280)
+
+
+class Kick:
+    @staticmethod
+    def enter(boy, e):
+        boy.frame = 0
+        if (right_down(e) and StateMachine.isdash and StateMachine.iskick) or (right_up(e) and StateMachine.isdash and StateMachine.iskick)or (right_down(e) and StateMachine.iskick)  :  # 오른쪽으로 RUN
+            boy.face_dir =  1
+        elif (left_down(e) and StateMachine.isdash and StateMachine.iskick) or (left_up(e) and StateMachine.isdash and StateMachine.iskick) or (left_down(e) and StateMachine.iskick):  # 왼쪽으로 RUN
+            boy.face_dir = -1
+        boy.frame = 0   #Add
+
+    @staticmethod
+    def exit(boy, e):
+        if space_down(e):
+            boy.fire_ball()
+        pass
+
+    @staticmethod
+    def do(boy):
+        boy.frame = (boy.frame + (FRAMES_PER_ACTION) * ACTION_PER_TIME * game_framework.frame_time)# % 6   Add
+        if int(boy.frame) > 2:
+            boy.frame = 0
+            StateMachine.iskick = False
+            boy.state_machine.handle_event(('TIME_OUT', 0))
+
+            boy.x = clamp(60, boy.x, 1000 - 60)
+
+        pass
+    @staticmethod
+    def draw(boy):
+        pix_posx = [0, 86, 190]
+        if boy.face_dir == 1:
+            boy.image_KICK.clip_draw(pix_posx[int(boy.frame)],  0, 103, 109, boy.x, boy.y, 270, 280)
+
+        elif boy.face_dir == -1:
+            boy.image_KICK.clip_composite_draw(pix_posx[int(boy.frame)], 0, 103, 109, 0, 'h', boy.x, boy.y, 270, 280)
+class RunPunch:
+    @staticmethod
+    def enter(boy, e):
+        boy.frame=0
+        if (StateMachine.isspace and right_down(e)) or (StateMachine.isspace and right_up(e)) :  # 오른쪽으로 RUN
+            boy.face_dir = 1
+        elif (StateMachine.isspace and left_down(e)) or(StateMachine.isspace and left_up(e)):  # 왼쪽으로 RUN
+            boy.face_dir = -1
+
+    @staticmethod
+    def exit(boy, e):
+        pass
+
+    @staticmethod
+    def do(boy):
+        boy.frame = (boy.frame + (FRAMES_PER_ACTION) * ACTION_PER_TIME * game_framework.frame_time)
+        if int(boy.frame) > 2:
+            boy.frame = 0
+            boy.state_machine.handle_event(('TIME_OUT', 0))
+
+
+
+        pass
+    @staticmethod
+    def draw(boy):
+        pix_posX = [8, 107, 207]
+
+        if boy.face_dir == 1:
+            boy.image_RUNPUNCH.clip_draw(pix_posX[int(boy.frame)], 0, 93, 107, boy.x + 10, boy.y + 10, 260, 290)
+
+        elif boy.face_dir == -1:
+            boy.image_RUNPUNCH.clip_composite_draw(pix_posX[int(boy.frame)], 0, 93, 107, 0, 'h', boy.x-10,  boy.y+10, 260, 290)
 
 class StateMachine:
     isdash = False
