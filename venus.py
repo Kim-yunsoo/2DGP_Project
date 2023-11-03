@@ -204,6 +204,74 @@ class Punch:
                  boy.image_PUNCH.clip_composite_draw(pix_posX[int(boy.frame)], 0, 70, 110, 0, 'h', boy.x-20 , boy.y,  180, 280)
 
 
+class Kick:
+    @staticmethod
+    def enter(boy, e):
+        boy.frame = 0
+        if (right_down(e) and StateMachine.isdash and StateMachine.iskick) or (right_up(e) and StateMachine.isdash and StateMachine.iskick)or (right_down(e) and StateMachine.iskick)  :  # 오른쪽으로 RUN
+            boy.face_dir =  1
+        elif (left_down(e) and StateMachine.isdash and StateMachine.iskick) or (left_up(e) and StateMachine.isdash and StateMachine.iskick) or (left_down(e) and StateMachine.iskick):  # 왼쪽으로 RUN
+            boy.face_dir = -1
+        boy.frame = 0   #Add
+
+    @staticmethod
+    def exit(boy, e):
+        pass
+
+    @staticmethod
+    def do(boy):
+        boy.frame = (boy.frame + (FRAMES_PER_ACTION) * ACTION_PER_TIME * game_framework.frame_time)# % 6   Add
+        if int(boy.frame) > 4:
+            boy.frame = 0
+            StateMachine.iskick = False
+            boy.state_machine.handle_event(('TIME_OUT', 0))
+
+
+        boy.x = clamp(60, boy.x, 1000 - 60)
+
+        pass
+    @staticmethod
+    def draw(boy):
+        # boy.image_KICK.clip_draw(0, 0, 104, 109, boy.x, boy.y, 270, 280)
+        pix_posx = [0, 90, 190, 330, 430]
+        if boy.face_dir == 1:
+            boy.image_KICK.clip_draw(pix_posx[int(boy.frame)],  0, 104, 109, boy.x, boy.y, 270, 280)
+
+
+        elif boy.face_dir == -1:
+            boy.image_KICK.clip_composite_draw(pix_posx[int(boy.frame)], 0, 104, 109, 0, 'h', boy.x, boy.y, 270, 280)
+class RunPunch:
+    @staticmethod
+    def enter(boy, e):
+        boy.frame=0
+        if (StateMachine.isspace and right_down(e)) or (StateMachine.isspace and right_up(e)) :  # 오른쪽으로 RUN
+            boy.face_dir = 1
+        elif (StateMachine.isspace and left_down(e)) or(StateMachine.isspace and left_up(e)):  # 왼쪽으로 RUN
+            boy.face_dir = -1
+
+    @staticmethod
+    def exit(boy, e):
+        pass
+
+    @staticmethod
+    def do(boy):
+        boy.frame = (boy.frame + (FRAMES_PER_ACTION) * ACTION_PER_TIME * game_framework.frame_time)
+        if int(boy.frame) > 2:
+            boy.frame = 0
+            boy.state_machine.handle_event(('TIME_OUT', 0))
+
+
+
+        pass
+    @staticmethod
+    def draw(boy):
+
+        pix_posX = [0, 99, 201]
+        if boy.face_dir == 1:
+            boy.image_RUNPUNCH.clip_draw(pix_posX[int(boy.frame)], 0, 99, 99, boy.x + 30, boy.y + 10, 260, 290)
+        elif boy.face_dir == -1:
+            boy.image_RUNPUNCH.clip_composite_draw(pix_posX[int(boy.frame)], 0, 99, 99, 0, 'h', boy.x-30, boy.y + 10, 260, 290)
+
 class StateMachine:
     isdash = False
     ispunch = True
