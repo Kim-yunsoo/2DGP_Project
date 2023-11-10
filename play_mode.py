@@ -3,7 +3,6 @@ from pico2d import *
 import game_world
 import item_mode
 import title_mode
-from grass import Grass
 from moon import Moon
 from hp_ui import HPUI
 import game_framework
