@@ -357,11 +357,33 @@ class Kick:
 class RunPunch:
     @staticmethod
     def enter(boy, e):
+        if boy.round == 1:
+            P1 = play_mode.player1
+            P2 = play_mode.player2
+        elif boy.round == 2:
+            P1 = play_mode2.player1
+            P2 = play_mode2.player2
+        elif boy.round == 3:
+            P1 = play_mode3.player1
+            P2 = play_mode3.player2
         boy.frame=0
-        if (StateMachine.isspace and right_down(e)) or (StateMachine.isspace and right_up(e)) :  # 오른쪽으로 RUN
-            boy.face_dir = 1
-        elif (StateMachine.isspace and left_down(e)) or(StateMachine.isspace and left_up(e)):  # 왼쪽으로 RUN
-            boy.face_dir = -1
+        if boy.playernum == 1:
+            punchCollision = Collision('runpunch', boy.face_dir, boy.x, boy.y)
+            game_world.add_object(punchCollision)
+            game_world.add_collision_pair('player2:runpunch', P2, punchCollision)
+            if (StateMachine.isspace1 and d_down(e)) or (StateMachine.isspace1 and d_up(e)):  # 오른쪽으로 RUN
+                boy.face_dir = 1
+            elif (StateMachine.isspace1 and a_down(e)) or (StateMachine.isspace1 and a_up(e)):  # 왼쪽으로 RUN
+                boy.face_dir = -1
+
+        if boy.playernum == 2:
+            punchCollision = Collision('runpunch', boy.face_dir, boy.x, boy.y)
+            game_world.add_object(punchCollision)
+            game_world.add_collision_pair('player1:runpunch',P1, punchCollision)
+            if (StateMachine.isspace2 and right_down(e)) or (StateMachine.isspace2 and right_up(e)):  # 오른쪽으로 RUN
+                boy.face_dir = 1
+            elif (StateMachine.isspace2 and left_down(e)) or (StateMachine.isspace2 and left_up(e)):  # 왼쪽으로 RUN
+                boy.face_dir = -1
 
     @staticmethod
     def exit(boy, e):
@@ -382,7 +404,6 @@ class RunPunch:
             boy.image_RUNPUNCH.clip_draw(pix_posX[int(boy.frame)],0, 85, 113, boy.x + 10, boy.y + 10, 230, 290)
         elif boy.face_dir == -1:
             boy.image_RUNPUNCH.clip_composite_draw(pix_posX[int(boy.frame)], 0, 85, 113, 0, 'h', boy.x-10,  boy.y + 10, 230, 290)
-
 
 class StateMachine:
     isdash = False
