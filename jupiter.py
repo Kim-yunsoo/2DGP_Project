@@ -112,10 +112,6 @@ def num6_up(e):
 class Idle:
     @staticmethod
     def enter(boy, e):
-        if boy.face_dir == -1:
-            boy.action = 2
-        elif boy.face_dir == 1:
-            boy.action = 3
         boy.dir = 0
         boy.frame = 0
         boy.wait_time = get_time()  # pico2d import 필요
