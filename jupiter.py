@@ -480,24 +480,52 @@ class Dead:
         elif boy.face_dir == -1:
             boy.image_DEAD.clip_composite_draw(pix_posx[int(boy.frame)], 0, 103, 117, 0, 'h', boy.x, boy.y + 10, 275, 305)
 
-            
-class StateMachine:
-    isdash = False
-    ispunch = True
-    iskick = True
-    isspace=False
 
+class StateMachine:
+    isdash1 = False
+    ispunch1 = True
+    iskick1 = True
+    isspace1=False
+
+    isdash2 = False
+    ispunch2 = True
+    iskick2 = True
+    isspace2 = False
     def __init__(self, boy):
         self.boy = boy
         self.cur_state = Idle
-        self.transitions = {
-            Idle: {right_down: Walk, left_down: Walk, left_up: Idle, right_up: Idle, space_down: Idle,a_down:Punch, s_down:Kick},
-            Walk: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle, shift_down:Run, a_down:Punch, s_down:Kick,},
-            Run:{shift_up:Walk, right_up: Idle, left_up:Idle, right_down: Idle, left_down: Idle, a_down:Punch, s_down:Kick,space_down:RunPunch},
-            Punch:{right_down:Walk , left_down:Walk, s_down:Kick, time_out:Idle},
-            Kick:{ right_down:Walk , left_down:Walk,a_down:Punch, time_out:Idle},
-            RunPunch:{time_out:Idle}
-        }
+        if boy.playernum == 1:
+            self.transitions = {
+                Idle: {d_down: Walk, a_down: Walk, a_up: Idle, d_up: Idle, h_down: Idle,
+                       g_down: Punch, j_down: Kick, damage: Damage, dead: Dead},
+                Walk: {d_down: Idle, damage: Damage, a_down: Idle, d_up: Idle, a_up: Idle, shift_downL: Run,
+                       g_down: Punch,
+                       j_down: Kick, dead: Dead},
+                Run: {d_up: Idle, a_up: Idle, d_down: Idle, a_down: Idle, g_down: Punch,
+                      j_down: Kick, h_down: RunPunch, damage: Damage, dead: Dead},
+                Punch: {d_down: Walk, a_down: Walk, j_down: Kick, time_out: Idle, damage: Damage, dead: Dead},
+                Kick: {d_down: Walk, a_down: Walk, g_down: Punch, time_out: Idle, damage: Damage, dead: Dead},
+                RunPunch: {time_out: Idle, damage: Damage, dead: Dead},
+                Damage: {time_out: Idle},
+                Dead: {}
+            }
+        elif boy.playernum == 2:
+            self.transitions = {
+                Idle: {right_down: Walk, left_down: Walk, left_up: Idle, right_up: Idle, num5_down: Idle,
+                       num4_down: Punch, num6_down: Kick, damage: Damage, dead: Dead},
+                Walk: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle, shift_downR: Run,
+                       num4_down: Punch,
+                       num6_down: Kick, damage: Damage, dead: Dead},
+                Run: {right_up: Idle, left_up: Idle, right_down: Idle, left_down: Idle, num4_down: Punch,
+                      num6_down: Kick
+                    , num5_down: RunPunch, damage: Damage, dead: Dead},
+                Punch: {right_down: Walk, left_down: Walk, num6_down: Kick, time_out: Idle, damage: Damage, dead: Dead},
+                Kick: {right_down: Walk, left_down: Walk, num4_down: Punch, time_out: Idle, damage: Damage, dead: Dead},
+                RunPunch: {time_out: Idle},
+                Damage: {time_out: Idle},
+                Dead: {}
+            }
+
 
     def start(self):
         self.cur_state.enter(self.boy, ('NONE', 0))
@@ -506,23 +534,38 @@ class StateMachine:
         self.cur_state.do(self.boy)
 
     def handle_event(self, e):
-        global ispush
-        global istoggle
-        if shift_down(e):
-            StateMachine.isdash=True
-        elif shift_up(e):
-            StateMachine.isdash = False
+        if shift_downR(e):
+            StateMachine.isdash2=True
+        elif shift_upR(e):
+            StateMachine.isdash2 = False
 
-        if space_down(e):
-            StateMachine.isspace=True
-        elif space_up(e):
-            StateMachine.isspace = False
-        if a_up(e):
-            StateMachine.ispunch = True
+        if shift_downL(e):
+            StateMachine.isdash1 = True
+        elif shift_upL(e):
+            StateMachine.isdash1 = False
 
-        if s_up(e):
-            StateMachine.iskick = True
+        # if a_down(e):
+        #     StateMachine.ispunch = True
+        if g_up(e):
+            StateMachine.ispunch1 = True
+        if num4_up(e):
+            StateMachine.ispunch2 = True
 
+
+        if h_down(e):
+            StateMachine.isspace1=True
+        elif h_up(e):
+            StateMachine.isspace1 = False
+
+        if num5_down(e):
+            StateMachine.isspace2 = True
+        elif num5_up(e):
+            StateMachine.isspace2 = False
+
+        if j_up(e):
+            StateMachine.iskick1 = True
+        if num6_up(e):
+            StateMachine.iskick2 = True
 
 
         for check_event, next_state in self.transitions[self.cur_state].items():
@@ -536,6 +579,7 @@ class StateMachine:
 
     def draw(self):
         self.cur_state.draw(self.boy)
+
 
 
 class Jupiter:
