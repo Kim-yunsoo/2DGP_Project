@@ -111,13 +111,11 @@ def num6_up(e):
 # time_out = lambda e : e[0] == 'TIME_OUT'
 
 
+
+
 class Idle:
     @staticmethod
     def enter(boy, e):
-        if boy.face_dir == -1:
-            boy.action = 2
-        elif boy.face_dir == 1:
-            boy.action = 3
         boy.dir = 0
         boy.frame = 0
         boy.wait_time = get_time()  # pico2d import 필요
@@ -147,7 +145,6 @@ class Idle:
         elif boy.face_dir == -1:
             # boy.image_KICK.clip_draw(0, 0, 79, 115, boy.x, boy.y, 196, 280)
             boy.image_IDLE.clip_composite_draw(0, 0, 46, 109, 0, 'h', boy.x, boy.y,  130, 280)
-
 
 class Walk:
 
