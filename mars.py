@@ -150,10 +150,16 @@ class Walk:
 
     @staticmethod
     def enter(boy, e):
-        if  right_down(e) or left_up(e) :  # 오른쪽으로 RUN
-            boy.dir, boy.action, boy.face_dir = 1, 1, 1
-        elif left_down(e) or right_up(e) :  # 왼쪽으로 RUN
-            boy.dir, boy.action, boy.face_dir = -1, 0, -1
+        if boy.playernum == 2:
+            if right_down(e) or left_up(e):  # 오른쪽으로 RUN
+                boy.dir, boy.action, boy.face_dir = 1, 1, 1
+            elif left_down(e) or right_up(e):  # 왼쪽으로 RUN
+                boy.dir, boy.action, boy.face_dir = -1, 0, -1
+        elif boy.playernum == 1:
+            if d_down(e) or a_up(e):  # 오른쪽으로 RUN
+                boy.dir, boy.action, boy.face_dir = 1, 1, 1
+            elif a_down(e) or d_up(e):  # 왼쪽으로 RUN
+                boy.dir, boy.action, boy.face_dir = -1, 0, -1
 
     @staticmethod
     def exit(boy, e):
