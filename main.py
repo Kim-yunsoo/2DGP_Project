@@ -4,6 +4,8 @@ import game_framework
 import title_mode as start_mode
 # import play_mode as start_mode
 # import select_mode as start_mode
+# import player1win as start_mode
+
 
 
 open_canvas(1000 ,700)
