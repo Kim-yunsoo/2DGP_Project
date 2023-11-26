@@ -188,13 +188,21 @@ class Walk:
             boy.image_WALK.clip_composite_draw(pix_posx[int(boy.frame)], 0, 44, 115, 0, 'h', boy.x, boy.y, 130, 280)
 
 
+
 class Run:
     @staticmethod
     def enter(boy, e):
-        if (right_down(e) and StateMachine.isdash) or (left_up(e) and StateMachine.isdash):  # 오른쪽으로 RUN
-            boy.dir, boy.action, boy.face_dir = 1, 1, 1
-        elif (left_down(e) and StateMachine.isdash) or (right_up(e) and StateMachine.isdash):  # 왼쪽으로 RUN
-            boy.dir, boy.action, boy.face_dir = -1, 0, -1
+        if boy.playernum == 1:
+            if (d_down(e) and StateMachine.isdash1) or (a_up(e) and StateMachine.isdash1):  # 오른쪽으로 RUN
+                boy.dir, boy.face_dir = 1, 1
+            elif (a_down(e) and StateMachine.isdash1) or (d_up(e) and StateMachine.isdash1):  # 왼쪽으로 RUN
+                boy.dir, boy.face_dir = -1, -1
+
+        elif boy.playernum == 2:
+            if (right_down(e) and StateMachine.isdash2) or (left_up(e) and StateMachine.isdash2):  # 오른쪽으로 RUN
+                boy.dir, boy.face_dir = 1, 1
+            elif (left_down(e) and StateMachine.isdash2) or (right_up(e) and StateMachine.isdash2):  # 왼쪽으로 RUN
+                boy.dir, boy.face_dir = -1, -1
 
     @staticmethod
     def exit(boy, e):
