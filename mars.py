@@ -230,14 +230,45 @@ class Run:
         # boy.image.clip_draw(boy.frame * 100, boy.action * 100, 100, 100, boy.x, boy.y)
 
 
+
 class Punch:
     @staticmethod
     def enter(boy, e):
-        boy.frame=0
-        if (right_down(e) and StateMachine.isdash and StateMachine.ispunch) or (right_up(e) and StateMachine.isdash and StateMachine.ispunch)or (right_down(e) and StateMachine.ispunch)  :  # 오른쪽으로 RUN
-            boy.dir, boy.action, boy.face_dir = 1, 1, 1
-        elif (left_down(e) and StateMachine.isdash and StateMachine.ispunch) or (left_up(e) and StateMachine.isdash and StateMachine.ispunch) or (left_down(e) and StateMachine.ispunch):  # 왼쪽으로 RUN
-            boy.dir, boy.action, boy.face_dir = -1, 0, -1
+        boy.frame = 0
+        if boy.round == 1:
+            P1 = play_mode.player1
+            P2 = play_mode.player2
+        elif boy.round == 2:
+            P1 = play_mode2.player1
+            P2 = play_mode2.player2
+        elif boy.round == 3:
+            P1 = play_mode3.player1
+            P2 = play_mode3.player2
+
+        if boy.playernum == 1:
+            punchCollision = Collision('punch', boy.face_dir, boy.x, boy.y)
+            game_world.add_object(punchCollision)
+            game_world.add_collision_pair('player2:punch', P2, punchCollision)
+            if (d_down(e) and StateMachine.isdash1 and StateMachine.ispunch1) or (
+                    d_up(e) and StateMachine.isdash1 and StateMachine.ispunch1) or (
+                    d_down(e) and StateMachine.ispunch1):  # 오른쪽으로 RUN
+                boy.dir, boy.action, boy.face_dir = 1, 1, 1
+            elif (a_down(e) and StateMachine.isdash1 and StateMachine.ispunch1) or (
+                    a_up(e) and StateMachine.isdash1 and StateMachine.ispunch1) or (
+                    a_down(e) and StateMachine.ispunch1):  # 왼쪽으로 RUN
+                boy.dir, boy.action, boy.face_dir = -1, 0, -1
+        elif boy.playernum == 2:
+            punchCollision = Collision('punch', boy.face_dir, boy.x, boy.y)
+            game_world.add_object(punchCollision)
+            game_world.add_collision_pair('player1:punch', P1, punchCollision)
+            if (right_down(e) and StateMachine.isdash2 and StateMachine.ispunch2) or (
+                    right_up(e) and StateMachine.isdash2 and StateMachine.ispunch2) or (
+                    right_down(e) and StateMachine.ispunch2):  # 오른쪽으로 RUN
+                boy.dir, boy.action, boy.face_dir = 1, 1, 1
+            elif (left_down(e) and StateMachine.isdash2 and StateMachine.ispunch2) or (
+                    left_up(e) and StateMachine.isdash2 and StateMachine.ispunch2) or (
+                    left_down(e) and StateMachine.ispunch2):  # 왼쪽으로 RUN
+                boy.dir, boy.action, boy.face_dir = -1, 0, -1
 
     @staticmethod
     def exit(boy, e):
@@ -250,7 +281,10 @@ class Punch:
         boy.frame = (boy.frame + (FRAMES_PER_ACTION) * ACTION_PER_TIME * game_framework.frame_time)
         if int(boy.frame) > 1:
             boy.frame = 0
-            StateMachine.ispunch = False
+            if boy.playernum == 1:
+                StateMachine.ispunch1 = False
+            elif boy.playernum == 2:
+                StateMachine.ispunch2 = False
             boy.state_machine.handle_event(('TIME_OUT', 0))
 
 
@@ -258,14 +292,12 @@ class Punch:
         pass
     @staticmethod
     def draw(boy):
-        global ispush
         pix_posX = [0, 62]
 
         if boy.face_dir == 1:
                 boy.image_PUNCH.clip_draw(pix_posX[int(boy.frame)], 0, 65, 110, boy.x+20 , boy.y,  180, 280)
         elif boy.face_dir == -1:
                  boy.image_PUNCH.clip_composite_draw(pix_posX[int(boy.frame)], 0, 65, 110, 0, 'h', boy.x-20 , boy.y,  180, 280)
-
 
 class Kick:
     @staticmethod
