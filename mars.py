@@ -299,14 +299,46 @@ class Punch:
         elif boy.face_dir == -1:
                  boy.image_PUNCH.clip_composite_draw(pix_posX[int(boy.frame)], 0, 65, 110, 0, 'h', boy.x-20 , boy.y,  180, 280)
 
+
 class Kick:
     @staticmethod
     def enter(boy, e):
         boy.frame = 0
-        if (right_down(e) and StateMachine.isdash and StateMachine.iskick) or (right_up(e) and StateMachine.isdash and StateMachine.iskick)or (right_down(e) and StateMachine.iskick)  :  # 오른쪽으로 RUN
-            boy.face_dir =  1
-        elif (left_down(e) and StateMachine.isdash and StateMachine.iskick) or (left_up(e) and StateMachine.isdash and StateMachine.iskick) or (left_down(e) and StateMachine.iskick):  # 왼쪽으로 RUN
-            boy.face_dir = -1
+        if boy.round == 1:
+            P1 = play_mode.player1
+            P2 = play_mode.player2
+        elif boy.round == 2:
+            P1 = play_mode2.player1
+            P2 = play_mode2.player2
+        elif boy.round == 3:
+            P1 = play_mode3.player1
+            P2 = play_mode3.player2
+
+        if boy.playernum == 2:
+            punchCollision = Collision('kick', boy.face_dir, boy.x, boy.y)
+            game_world.add_object(punchCollision)
+            game_world.add_collision_pair('player1:kick', P1, punchCollision)
+            if ((right_down(e) and StateMachine.isdash2 and StateMachine.iskick2)
+                    or (right_up(e) and StateMachine.isdash2 and StateMachine.iskick2)
+                    or (right_down(e) and StateMachine.iskick2)):  # 오른쪽으로 RUN
+                boy.face_dir = 1
+            elif ((left_down(e) and StateMachine.isdash2 and StateMachine.iskick2)
+                  or (left_up(e) and StateMachine.isdash2 and StateMachine.iskick2)
+                  or (left_down(e) and StateMachine.iskick2)):  # 왼쪽으로 RUN
+                boy.face_dir = -1
+
+        if boy.playernum == 1:
+            punchCollision = Collision('kick', boy.face_dir, boy.x, boy.y)
+            game_world.add_object(punchCollision)
+            game_world.add_collision_pair('player2:kick', P2, punchCollision)
+            if ((d_down(e) and StateMachine.isdash1 and StateMachine.iskick1)
+                    or (d_up(e) and StateMachine.isdash1 and StateMachine.iskick1)
+                    or (d_down(e) and StateMachine.iskick1)):  # 오른쪽으로 RUN
+                boy.face_dir = 1
+            elif ((a_down(e) and StateMachine.isdash1 and StateMachine.iskick1)
+                  or (a_up(e) and StateMachine.isdash1 and StateMachine.iskick1)
+                  or (a_down(e) and StateMachine.iskick1)):  # 왼쪽으로 RUN
+                boy.face_dir = -1
         boy.frame = 0   #Add
 
     @staticmethod
@@ -318,7 +350,10 @@ class Kick:
         boy.frame = (boy.frame + (FRAMES_PER_ACTION) * ACTION_PER_TIME * game_framework.frame_time)# % 6   Add
         if int(boy.frame) > 1:
             boy.frame = 0
-            StateMachine.iskick = False
+            if boy.playernum == 1:
+                StateMachine.iskick1 = False
+            if boy.playernum == 2:
+                StateMachine.iskick2 = False
             boy.state_machine.handle_event(('TIME_OUT', 0))
 
             # boy.frame = (boy.frame + (FRAMES_PER_ACTION) * ACTION_PER_TIME * game_framework.frame_time) % 6
