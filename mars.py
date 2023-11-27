@@ -611,35 +611,242 @@ class StateMachine:
 
 
 class Mars:
-    def __init__(self):
-        self.x, self.y = 500,200
+    attack_sound = None
+
+    def __init__(self, playernum, round):
+
+        if not Mars.attack_sound:
+            Mars.attack_sound = load_wav('resource/sound/attack.wav')
+        self.round=round
         self.frame = 0
-        self.face_dir = 1
         self.dir = 0
+        self.toggle=True
         self.image_WALK = load_image('resource/mars/marsWalk.png')
         self.image_IDLE = load_image('resource/mars/marsIdle.png')
         self.image_RUN = load_image('resource/mars/marsRun.png')
         self.image_PUNCH = load_image('resource/mars/marsPunch.png')
         self.image_KICK=load_image('resource/mars/marsKick.png')
         self.image_HPUI=load_image('resource/ui/hpUI2.png')
-        self.image_jupiterUI=load_image('resource/ui/marsUI.png')
+        self.image_marsUI=load_image('resource/ui/marsUI.png')
         self.image_RUNKICK=load_image('resource/mars/marsRunKick.png')
+        self.image_DAMAGE = load_image('resource/mars/marsDamage.png')
+        self.image_DEAD = load_image('resource/mars/marsDead.png')
+
+        self.image_SCORE0_P1=load_image('resource/ui/player1score0.png')
+        self.image_SCORE1_P1=load_image('resource/ui/player1score1.png')
+        self.image_SCORE2_P1=load_image('resource/ui/player1score2.png')
+
+        self.image_SCORE0_P2 = load_image('resource/ui/player2score0.png')
+        self.image_SCORE1_P2 = load_image('resource/ui/player2score1.png')
+        self.image_SCORE2_P2 = load_image('resource/ui/player2score2.png')
+        self.ignore_collision_time = 0
+        self.ignore_duration = 0.8   # 1초 동안 충돌 무시
+
+        self.item = None
+        self.hp=90
+        self.attack=15
+        self.superattack=20
+
+        self.playernum = playernum
+        if playernum == 1:
+            self.x, self.y = 200, 210
+            self.face_dir = 1
+
+        else:
+            self.x, self.y = 800, 210
+            self.face_dir = -1
         self.state_machine = StateMachine(self)
         self.state_machine.start()
-        self.item = None
-        self.hp=100
 
     def update(self):
         self.state_machine.update()
 
     def handle_event(self, event):
         self.state_machine.handle_event(('INPUT', event))
+    def get_bb(self):
+        return self.x-50,self.y-120,self.x+50,self.y+120 # 값 4개짜리 튜플 1개
 
     def draw(self):
-        # for i in range(self.hp//10) :
 
         self.state_machine.draw()
-        self.image_jupiterUI.clip_draw(0, 0, 157, 75, 105,640,    160,70)
+        if self.playernum == 1:
+            self.image_marsUI.clip_draw(0, 0, 173, 75, 105, 640, 160, 70)
 
-        for i in range(self.hp//10):
-            self.image_HPUI.clip_draw(0, 0,  549, 41,    59+(38*i), 600,    38, 30)
+            for i in range(self.hp // 5):
+                self.image_HPUI.clip_draw(0, 0, 549, 41, 44 + (22 * i), 600, 22, 30)
+            if play_mode.player1_score == 0:
+                self.image_SCORE0_P1.clip_draw(0, 0, 201, 66, 120, 560, 180, 56)
+            elif play_mode.player1_score == 1:
+                self.image_SCORE1_P1.clip_draw(0, 0, 201, 66, 120, 560, 180, 56)
+            elif play_mode.player1_score == 2:
+                self.image_SCORE2_P1.clip_draw(0, 0, 201, 66, 120, 560, 180, 56)
+
+        elif self.playernum == 2:
+            self.image_marsUI.clip_draw(0, 0, 173, 75, 900, 640, 160, 70)
+
+            for i in range(self.hp // 5):
+                self.image_HPUI.clip_draw(0, 0, 549, 41, 590 + (22 * i), 600, 22, 30)
+            if play_mode.player2_score == 0:
+                self.image_SCORE0_P2.clip_draw(0,0, 201,66 ,890, 560,180,56 )
+            elif play_mode.player2_score == 1:
+                self.image_SCORE1_P2.clip_draw(0,0, 201,66 ,890, 560,180,56 )
+            elif play_mode.player2_score == 2:
+                self.image_SCORE2_P2.clip_draw(0, 0, 201, 66, 890, 560, 180, 56)
+        draw_rectangle(*self.get_bb())  # 튜플을 풀어헤쳐서 각각 인자로 전달해준다.
+
+    def handle_collision(self, group, other):
+        current_time = get_time()
+
+        if current_time - self.ignore_collision_time < self.ignore_duration:
+            return
+
+        if self.round == 1:
+            P1 = play_mode.player1
+            P2 = play_mode.player2
+        elif self.round == 2:
+            P1 = play_mode2.player1
+            P2 = play_mode2.player2
+        elif self.round == 3:
+            P1 = play_mode3.player1
+            P2 = play_mode3.player2
+
+        if group == 'player2:punch':
+            if self.playernum == 2:
+                self.hp -= P1.attack
+                play_mode.player1combo += 1
+                play_mode.player2combo = 0
+                if play_mode.player1combo == 3:
+                    self.hp -= 5
+                    play_mode.player1combo = 0
+
+                if self.hp > 0:
+                    Mars.attack_sound.play()
+                    game_world.add_object(Effect('punch', P2.face_dir, P2.x, P2.y), 3)
+                    self.state_machine.handle_event(('DAMAGE', 0))
+
+                elif self.hp <= 0:
+                    if self.toggle:
+                        play_mode.player1_score += 1
+                        Mars.attack_sound.play()
+                        game_world.add_object(DeadEffect('punch', P2.face_dir, P2.x, P2.y), 3)
+                        self.toggle = False
+                    self.state_machine.handle_event(('DEAD', 0))
+
+        if group == 'player2:kick':
+            if self.playernum == 2:
+                self.hp -= P1.attack
+                play_mode.player1combo += 1
+                play_mode.player2combo = 0
+                if play_mode.player1combo == 3:
+                    self.hp -= 5
+                    play_mode.player1combo = 0
+                if self.hp > 0:
+                    Mars.attack_sound.play()
+
+                    game_world.add_object(Effect('kick', P2.face_dir, P2.x, P2.y), 3)
+                    self.state_machine.handle_event(('DAMAGE', 0))
+
+                elif self.hp <= 0:
+                    if self.toggle:
+                        play_mode.player1_score += 1
+                        Mars.attack_sound.play()
+
+                        game_world.add_object(DeadEffect('kick', P2.face_dir, P2.x, P2.y), 3)
+                        self.toggle = False
+                    self.state_machine.handle_event(('DEAD', 0))
+
+        if group == 'player1:punch':
+            if self.playernum == 1:
+                self.hp -= P2.attack
+                play_mode.player2combo += 1
+
+                play_mode.player1combo = 0
+                if play_mode.player2combo == 3:
+                    self.hp -= 5
+                    play_mode.player2combo = 0
+
+                if self.hp > 0:
+                    Mars.attack_sound.play()
+
+                    game_world.add_object(Effect('punch', P1.face_dir, P1.x, P1.y), 3)
+                    self.state_machine.handle_event(('DAMAGE', 0))
+
+                elif self.hp <= 0:
+                    if self.toggle:
+                        Mars.attack_sound.play()
+
+                        play_mode.player2_score += 1
+                        game_world.add_object(DeadEffect('punch', P1.face_dir, P1.x, P1.y), 3)
+                        self.toggle = False
+
+                    self.state_machine.handle_event(('DEAD', 0))
+
+        if group == 'player1:kick':
+            if self.playernum == 1:
+                self.hp -= P1.attack
+                play_mode.player1combo += 1
+                play_mode.player2combo = 0
+                if play_mode.player1combo == 3:
+                    self.hp -= 5
+                    play_mode.player1combo = 0
+                if self.hp > 0:
+                    Mars.attack_sound.play()
+
+                    game_world.add_object(Effect('kick', P1.face_dir, P1.x, P1.y), 3)
+                    self.state_machine.handle_event(('DAMAGE', 0))
+
+                elif self.hp <= 0:
+                    if self.toggle:
+                        Mars.attack_sound.play()
+
+                        play_mode.player2_score += 1
+                        game_world.add_object(DeadEffect('kick', P1.face_dir, P1.x, P1.y), 3)
+                        self.toggle = False
+                    self.state_machine.handle_event(('DEAD', 0))
+
+        if group == 'player2:runpunch':
+            if self.playernum == 2:
+                self.hp -= P1.superattack
+                play_mode.player1combo += 1
+                play_mode.player2combo = 0
+                if play_mode.player1combo == 3:
+                    self.hp -= 5
+                    play_mode.player1combo = 0
+                if self.hp > 0:
+                    Mars.attack_sound.play()
+
+                    game_world.add_object(StrongEffect('runpunch', P2.face_dir, P2.x, P2.y), 3)
+                    self.state_machine.handle_event(('DAMAGE', 0))
+                elif self.hp <= 0:
+                    if self.toggle:
+                        Mars.attack_sound.play()
+
+                        play_mode.player1_score += 1
+                        game_world.add_object(DeadEffect('runpunch', P2.face_dir, P2.x, P2.y), 3)
+                        self.toggle = False
+                    self.state_machine.handle_event(('DEAD', 0))
+
+        if group == 'player1:runpunch':
+            if self.playernum == 1:
+                self.hp -= P2.superattack
+                play_mode.player2combo += 1
+                play_mode.player1combo = 0
+                if play_mode.player2combo == 3:
+                    self.hp -= 5
+                    play_mode.player2combo = 0
+                if self.hp > 0:
+                    Mars.attack_sound.play()
+
+                    game_world.add_object(StrongEffect('runpunch', P1.face_dir, P1.x, P1.y), 3)
+                    self.state_machine.handle_event(('DAMAGE', 0))
+                elif self.hp <= 0:
+
+                    if self.toggle:
+                        Mars.attack_sound.play()
+
+                        play_mode.player2_score += 1
+                        game_world.add_object(DeadEffect('runpunch', P1.face_dir, P1.x, P1.y), 3)
+                        self.toggle = False
+
+                    self.state_machine.handle_event(('DEAD', 0))
+        self.ignore_collision_time = current_time
