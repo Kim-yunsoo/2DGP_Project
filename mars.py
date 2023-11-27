@@ -429,8 +429,87 @@ class RunKick:
 
 
 
+class Damage:
+    def enter(boy, e):
+        boy.frame = 0
+
+    @staticmethod
+    def exit(boy, e):
+        pass
+
+    @staticmethod
+    def do(boy):
+        boy.frame = (boy.frame + (FRAMES_PER_ACTION) * ACTION_PER_TIME * game_framework.frame_time)  # % 6   Add
+
+        if int(boy.frame) > 1:
+            boy.frame = 0
+            boy.state_machine.handle_event(('TIME_OUT', 0))
+
+            # boy.frame = (boy.frame + (FRAMES_PER_ACTION) * ACTION_PER_TIME * game_framework.frame_time) % 6
+        # boy.x += boy.dir * (RUN_SPEED_PPS+100) * game_framework.frame_time
+        # boy.x = clamp(60, boy.x, 1000 - 60)
+
+        pass
+
+    @staticmethod
+    def draw(boy):
+        if boy.face_dir == 1:
+            # boy.image_KICK.clip_draw(0, 0, 70, 114, boy.x, boy.y + 10, 220, 280)
+            boy.image_DAMAGE.clip_draw(0, 0, 60, 111, boy.x, boy.y , 180, 280)
+        elif boy.face_dir == -1:
+            boy.image_DAMAGE.clip_composite_draw(0, 0, 60, 111, 0, 'h', boy.x, boy.y , 180, 280)
 
 
+class Dead:
+    def enter(boy, e):
+        boy.frame = 0
+        boy.newtime=get_time()
+
+    @staticmethod
+    def exit(boy, e):
+        pass
+
+    @staticmethod
+    def do(boy):
+        boy.frame = (boy.frame + (FRAMES_PER_ACTION) * ACTION_PER_TIME * game_framework.frame_time)  # % 6   Add
+
+        if int(boy.frame) > 3:
+            boy.frame = 3
+
+        if get_time() - boy.newtime > 5:
+            boy.y = 1000
+            boy.x = 1000
+            if boy.round == 1:
+                play_mode.next = True
+            if play_mode.player1_score == 2:
+                play_mode.next = False
+                play_mode2.go_round3 = False
+                play_mode2.player1_Win = True
+            elif play_mode.player2_score == 2:
+                play_mode.next = False
+                play_mode2.go_round3 = False
+                play_mode2.player2_Win = True
+            elif play_mode.player1_score == 1 and play_mode.player2_score == 1:
+                play_mode.next = False
+                play_mode2.go_round3 = True
+
+            # 버그 막기
+
+
+            # boy.frame = (boy.frame + (FRAMES_PER_ACTION) * ACTION_PER_TIME * game_framework.frame_time) % 6
+        # boy.x += boy.dir * (RUN_SPEED_PPS+100) * game_framework.frame_time
+        # boy.x = clamp(60, boy.x, 1000 - 60)
+
+        pass
+
+    @staticmethod
+    def draw(boy):
+        pix_posx = [0, 109, 227, 367]
+        if boy.face_dir == 1:
+            # boy.image_KICK.clip_draw(0, 0, 70, 114, boy.x, boy.y + 10, 220, 280)
+            boy.image_DEAD.clip_draw(pix_posx[int(boy.frame)],0,123,115,boy.x, boy.y,290,305)
+        elif boy.face_dir == -1:
+            boy.image_DEAD.clip_composite_draw(pix_posx[int(boy.frame)], 0, 123, 115, 0, 'h', boy.x, boy.y, 290, 305)
 class StateMachine:
     isdash = False
     ispunch = True
