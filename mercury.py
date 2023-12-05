@@ -669,7 +669,7 @@ class Mercury:
                 self.image_SCORE1_P2.clip_draw(0,0, 201,66 ,890, 560,180,56 )
             elif play_mode.player2_score == 2:
                 self.image_SCORE2_P2.clip_draw(0, 0, 201, 66, 890, 560, 180, 56)
-        draw_rectangle(*self.get_bb())
+        # draw_rectangle(*self.get_bb())
 
     def handle_collision(self, group, other):
         current_time = get_time()

@@ -668,7 +668,6 @@ class Jupiter:
             elif play_mode.player2_score == 2:
                 self.image_SCORE2_P2.clip_draw(0, 0, 201, 66, 890, 560, 180, 56)
 
-        draw_rectangle(*self.get_bb())  # 튜플을 풀어헤쳐서 각각 인자로 전달해준다.
 
     def handle_collision(self, group, other):
         current_time = get_time()

@@ -50,7 +50,7 @@ class Collision:
 
 
     def draw(self):
-        draw_rectangle(*self.get_bb())  # 튜플을 풀어헤쳐서 각각 인자로 전달해준다.
+        pass
 
 
     def handle_collision(self, group, other):
