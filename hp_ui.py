@@ -2,7 +2,8 @@ from pico2d import load_image
 
 
 class HPUI:
-    def __init__(self):
+    def __init__(self,round):
+        self.round=round
         self.hpui1_image=load_image('resource/ui/hpUI1.png')
         self.mid_image = load_image('resource/ui/midUI.png')
 
@@ -25,6 +26,8 @@ class HPUI:
             self.round2_image.clip_draw(0, 0, 240, 76, 520, 550, 220, 56)
         if self.round == 3:
             self.round3_image.clip_draw(0, 0, 240, 76, 520, 550, 220, 56)
+
+
 
     def update(self):
         pass
