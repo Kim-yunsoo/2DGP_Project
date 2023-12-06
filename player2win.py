@@ -39,7 +39,7 @@ def handle_events():
                 arrowPosX=PosX[0]
 
         elif event.type == SDL_KEYDOWN and event.key == SDLK_SPACE:
-            if arrowPosX ==PosX[0]: #재시작
+            if arrowPosX ==PosX[0]:
                 play_mode.player1_score=0
                 play_mode.player2_score=0
                 play_mode.next=False
